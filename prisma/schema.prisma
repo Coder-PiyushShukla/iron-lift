@@ -7,7 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// 2. NEXT AUTH MODELS (Required for Google Login)
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -41,8 +40,45 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // Optional because Google users won't have one
-  accounts      Account[]
-  sessions      Session[]
+  password      String?
   createdAt     DateTime  @default(now())
+
+  // 1. Personal Stats
+  age    Int?
+  weight Float?
+  height Float?
+  gender String?
+  bmr    Int?
+
+  // 2. Onboarding Preferences
+  goal         String?
+  trainingDays Int?
+  dietType     String?
+
+  // 3. AI Generated Data
+  workoutPlan Json?
+  dietPlan    Json?
+
+  // 4. Gamification
+  streak      Int       @default(0)
+  lastWorkout DateTime?
+
+  // Relations
+  accounts Account[]
+  sessions Session[]
+  mealLogs MealLog[] // <--- ADDED THIS (Fixes the "missing opposite relation" error)
+}
+
+// Fixed MealLog Model for MongoDB
+model MealLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId // <--- Fixed ID format
+  userId    String   @db.ObjectId // <--- Fixed Foreign Key type
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  calories  Int
+  protein   Int
+  carbs     Int
+  fats      Int
+  imageUrl  String?
+  createdAt DateTime @default(now())
 }
