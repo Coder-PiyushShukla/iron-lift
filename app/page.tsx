@@ -1,147 +1,152 @@
-"use client"
-
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { PasswordInput } from "@/components/ui/password-input"
-import { Dumbbell } from "lucide-react"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Dumbbell, MapPin, ScanLine, Trophy, ArrowRight, Flame, Activity } from "lucide-react"
 
-export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+export default async function HomePage() {
+  const session = await getServerSession(authOptions)
 
-  const handleGoogleLogin = () => {
-    setIsLoading(true)
-    signIn("google", { callbackUrl: "/onboarding" })
-  }
+  // 1. If NOT logged in, show the Landing Page
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        {/* Ambient Background */}
+        <div className="absolute top-[-20%] right-[-10%] w-150 h-150 bg-red-600/20 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-150 h-150 bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsLoading(true)
-    const formData = new FormData(event.currentTarget)
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    })
-
-    if (result?.error) {
-      alert("Invalid Email or Password")
-      setIsLoading(false)
-    } else {
-      router.push("/onboarding")
-    }
-  }
-
-  return (
-    <div className="w-full h-screen grid lg:grid-cols-2">
-      
-      {/* LEFT SIDE: Visuals */}
-      <div className="hidden lg:flex flex-col justify-between bg-zinc-900 p-12 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop')" }} 
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-90" />
-
-        <div className="relative z-10 flex items-center gap-2">
-           <div className="bg-red-600 p-2 rounded-lg">
-             <Dumbbell className="h-6 w-6 text-white" />
-           </div>
-           <span className="text-xl font-bold text-white tracking-tight">IronLift</span>
-        </div>
-
-        <div className="relative z-10 space-y-4 max-w-lg">
-          <blockquote className="text-2xl font-medium text-white leading-relaxed">
-            "The only bad workout is the one that didn't happen. IronLift helps you track every rep, every set, and every gain."
-          </blockquote>
-          <p className="text-gray-400 text-sm">— The IronLift Manifesto</p>
-        </div>
-      </div>
-
-      {/* RIGHT SIDE: The Form */}
-      <div className="flex items-center justify-center bg-black p-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto w-full max-w-sm space-y-6"
-        >
-          <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
-            <p className="text-gray-400">Enter your credentials to access your account</p>
+        <div className="z-10 space-y-6 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-400 mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            AI-Powered Fitness Revolution
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">Email</Label>
-              <Input 
-                id="email" 
-                name="email" 
-                placeholder="name@example.com" 
-                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-red-500 focus:ring-red-500 transition-all" 
-                required 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-gray-300">Password</Label>
-                {/* NEW FORGOT PASSWORD LINK */}
-                <Link 
-                  href="/forgot-password" 
-                  className="text-xs text-red-500 hover:text-red-400 font-medium hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <PasswordInput 
-                id="password" 
-                name="password" 
-                label="" // Empty label because we added a custom one above
-                placeholder="••••••••" 
-                className="bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-red-500 focus:ring-red-500 transition-all"
-                required 
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={isLoading} 
-              className="w-full h-11 bg-red-600 hover:bg-red-700 text-white font-medium transition-all duration-200"
-            >
-              {isLoading ? "Signing in..." : "Sign In with Email"}
-            </Button>
-          </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-zinc-800" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-black px-2 text-zinc-500">Or continue with</span></div>
-          </div>
-
-          <Button 
-            variant="outline" 
-            type="button" 
-            onClick={handleGoogleLogin} 
-            className="w-full h-11 border-zinc-800 bg-zinc-900/30 text-white hover:bg-zinc-800 hover:text-white transition-all"
-          >
-             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
-            Google
-          </Button>
-
-          <p className="text-center text-sm text-gray-500">
-            Don't have an account? <Link href="/signup" className="font-semibold text-red-500 hover:text-red-400 hover:underline">Sign up</Link>
+          
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter">
+            IRON <span className="text-transparent bg-clip-text bg-linear-to-r from-red-500 to-orange-600">LIFT</span>
+          </h1>
+          
+          <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            Your personal AI coach, nutritionist, and gym locator all in one. 
+            Stop guessing. Start training with precision.
           </p>
-        </motion.div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <Link href="/api/auth/signin">
+              <Button className="h-14 px-8 text-lg bg-red-600 hover:bg-red-700 rounded-full font-bold shadow-[0_0_20px_rgba(220,38,38,0.5)] transition-all hover:scale-105">
+                Start For Free <ArrowRight className="ml-2" />
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button variant="outline" className="h-14 px-8 text-lg border-zinc-800 bg-black/50 hover:bg-zinc-900 rounded-full text-zinc-300">
+                Learn More
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
+    )
+  }
+
+  // 2. If LOGGED IN, show the "Command Center" Dashboard
+  return (
+    <div className="min-h-screen bg-black text-white p-6 md:p-12 relative overflow-hidden">
+       {/* Ambient Background */}
+       <div className="absolute top-0 left-0 w-full h-96 bg-linear-to-b from-zinc-900/50 to-black pointer-events-none" />
+       
+       <div className="max-w-7xl mx-auto relative z-10">
+        
+        {/* Header */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Hello, {session.user?.name?.split(" ")[0]} 👋</h1>
+            <p className="text-zinc-400">Ready to crush your goals today?</p>
+          </div>
+          
+          <div className="flex items-center gap-4 bg-zinc-900/50 border border-zinc-800 p-2 pr-6 rounded-full backdrop-blur-md">
+            <div className="bg-red-600/20 p-2 rounded-full">
+              <Flame className="text-red-500" size={24} />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 uppercase font-bold">Current Streak</p>
+              <p className="text-xl font-black">0 Days</p>
+            </div>
+          </div>
+        </header>
+
+        {/* FEATURE GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Card 1: AI Plan */}
+          <Link href="/dashboard" className="group">
+            <Card className="h-full bg-zinc-900 border-zinc-800 p-8 hover:border-red-600/50 transition-all hover:scale-[1.02] relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Dumbbell size={120} />
+              </div>
+              <div className="bg-blue-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-blue-500">
+                <Activity size={28} />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">My Plan</h3>
+              <p className="text-zinc-400 mb-6">View your personalized workout and diet routine generated by AI.</p>
+              <div className="flex items-center text-blue-400 font-bold group-hover:gap-2 transition-all">
+                Go to Dashboard <ArrowRight size={18} className="ml-1" />
+              </div>
+            </Card>
+          </Link>
+
+          {/* Card 2: Gym Finder */}
+          <Link href="/gyms" className="group">
+            <Card className="h-full bg-zinc-900 border-zinc-800 p-8 hover:border-red-600/50 transition-all hover:scale-[1.02] relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <MapPin size={120} />
+              </div>
+              <div className="bg-green-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-green-500">
+                <MapPin size={28} />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Find Gyms</h3>
+              <p className="text-zinc-400 mb-6">Locate the best rated gyms nearby with live OpenStreetMap data.</p>
+              <div className="flex items-center text-green-400 font-bold group-hover:gap-2 transition-all">
+                Explore Map <ArrowRight size={18} className="ml-1" />
+              </div>
+            </Card>
+          </Link>
+
+          {/* Card 3: Meal Scanner (NEW) */}
+          <Link href="/scanner" className="group">
+            <Card className="h-full bg-zinc-900 border-zinc-800 p-8 hover:border-red-600/50 transition-all hover:scale-[1.02] relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <ScanLine size={120} />
+              </div>
+              <div className="bg-red-600/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-red-500">
+                <ScanLine size={28} />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Iron Vision</h3>
+              <p className="text-zinc-400 mb-6">Scan your food instantly to get macros and calorie counts using AI.</p>
+              <div className="flex items-center text-red-400 font-bold group-hover:gap-2 transition-all">
+                Launch Scanner <ArrowRight size={18} className="ml-1" />
+              </div>
+            </Card>
+          </Link>
+
+           {/* Card 4: Leaderboard/Progress (Future) */}
+           <Link href="/generate" className="group md:col-span-3 lg:col-span-1">
+            <Card className="h-full bg-linear-to-br from-zinc-900 to-zinc-950 border-zinc-800 p-8 hover:border-yellow-600/50 transition-all hover:scale-[1.02] relative overflow-hidden flex flex-col justify-center">
+              <div className="flex items-center gap-4 mb-4">
+                 <div className="bg-yellow-600/20 p-3 rounded-full text-yellow-500">
+                   <Trophy size={24} />
+                 </div>
+                 <h3 className="text-xl font-bold">Regenerate Plan</h3>
+              </div>
+              <p className="text-zinc-400 text-sm">Need a change? Create a brand new routine from scratch.</p>
+            </Card>
+          </Link>
+
+        </div>
+       </div>
     </div>
-  );
+  )
 }

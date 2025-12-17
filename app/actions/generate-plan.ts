@@ -19,22 +19,21 @@ export async function generateEverything() {
   const user = await db.user.findUnique({ where: { email: session.user.email } })
   if (!user) return { error: "User not found." }
 
-  // 1. Calculate TDEE (Maintenance Calories) based on Activity Level
-  // This is much more accurate than just using BMR
+   
   let activityMultiplier = 1.2 // Default Sedentary
   
-  if (user.trainingDays === 4) activityMultiplier = 1.55  // Moderate
-  else if (user.trainingDays === 5) activityMultiplier = 1.65 // High Active
-  else if (user.trainingDays === 6) activityMultiplier = 1.725 // Very Active
+  if (user.trainingDays === 4) activityMultiplier = 1.55   
+  else if (user.trainingDays === 5) activityMultiplier = 1.65  
+  else if (user.trainingDays === 6) activityMultiplier = 1.725  
 
   const maintenanceCalories = Math.round((user.bmr || 2000) * activityMultiplier)
 
-  // 2. Adjust for Goal (Surplus or Deficit)
+   
   let targetCalories = maintenanceCalories
-  if (user.goal === "fatloss") targetCalories -= 500  // Standard deficit
-  else if (user.goal === "bulking") targetCalories += 400 // Lean bulk surplus
+  if (user.goal === "fatloss") targetCalories -= 500   
+  else if (user.goal === "bulking") targetCalories += 400  
   
-  // 3. Define Split Guide
+   
   let splitGuide = "Standard Split"
   if (user.trainingDays === 4) splitGuide = "Mon: Push, Tue: Pull, Wed: Legs, Thu: Rest, Fri: Full Body, Sat/Sun: Rest"
   else if (user.trainingDays === 6) splitGuide = "Push/Pull/Legs x2 (6 Day Split)"
@@ -83,7 +82,7 @@ export async function generateEverything() {
     const response = await result.response
     let text = response.text()
 
-    // Clean JSON
+     
     const firstBrace = text.indexOf("{")
     const lastBrace = text.lastIndexOf("}")
     if (firstBrace !== -1 && lastBrace !== -1) {
