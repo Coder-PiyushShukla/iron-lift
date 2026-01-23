@@ -18,17 +18,19 @@ export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
 
+  // 👇 ADDED SETTINGS BUTTON HERE
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Gym Map", href: "/gyms", icon: MapPin },
     { name: "Scanner", href: "/scanner", icon: ScanLine },
     { name: "Planner", href: "/planner", icon: Calendar },
     { name: "Learn", href: "/learn", icon: BookOpen },
-    // Settings is removed from here for mobile to save space, accessed via Profile on top
+    { name: "Settings", href: "/bmr", icon: Settings }, // ✅ Restored! Opens BMR page
   ]
 
   const handleProtectedNav = (e: React.MouseEvent, href: string) => {
-    const protectedRoutes = ["/dashboard", "/bmr", "/scanner", "/planner"]
+    // added /bmr to protected routes
+    const protectedRoutes = ["/dashboard", "/bmr", "/scanner", "/planner", "/settings"]
     const isProtected = protectedRoutes.includes(href)
 
     if (isProtected && !session) {
@@ -54,7 +56,7 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
                 <Dumbbell size={18} />
               </div>
-              <span>IRON<span className="text-red-600">LIFT</span></span>
+              <span className="text-white">IRON<span className="text-red-600">LIFT</span></span>
             </Link>
 
             {/* Desktop Links (Hidden on Mobile) */}
@@ -137,8 +139,8 @@ export default function Navbar() {
       </nav>
 
       {/* 📱 MOBILE BOTTOM NAVIGATION (Hidden on Desktop) */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-black/90 backdrop-blur-lg border-t border-zinc-800 pb-safe">
-        <div className="flex justify-around items-center h-16 px-2">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-black/95 backdrop-blur-lg border-t border-zinc-800 pb-safe">
+        <div className="flex justify-between items-center h-16 px-4">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -150,8 +152,10 @@ export default function Navbar() {
                   isActive ? "text-red-500" : "text-zinc-500"
                 }`}
               >
-                <item.icon className={`w-6 h-6 ${isActive ? "fill-current/20" : ""}`} />
-                <span className="text-[10px] font-medium">{item.name}</span>
+                {/* 👇 Adjusted size to w-5 h-5 so 6 items fit perfectly */}
+                <item.icon className={`w-5 h-5 ${isActive ? "fill-current/20" : ""}`} />
+                {/* 👇 Adjusted text size to 9px for better fit */}
+                <span className="text-[9px] font-medium">{item.name}</span>
               </Link>
             )
           })}
