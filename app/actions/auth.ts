@@ -1,10 +1,12 @@
 "use server"
 
-import { db } from "..//..//lib/db"
+import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
-import { redirect } from "next/navigation"
+import { Resend } from "resend"
 
- 
+// Initialize Resend with your API Key
+const resend = new Resend(process.env.RESEND_API_KEY)
+
 export async function signupUser(formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
@@ -15,7 +17,6 @@ export async function signupUser(formData: FormData) {
   }
 
   try {
- 
     const existingUser = await db.user.findUnique({
       where: { email }
     })
@@ -26,7 +27,7 @@ export async function signupUser(formData: FormData) {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-     await db.user.create({
+    await db.user.create({
       data: {
         name,
         email,
@@ -34,17 +35,15 @@ export async function signupUser(formData: FormData) {
       }
     })
 
-    console.log("✅ User Created:", email)
- 
     return { success: true }
 
   } catch (error) {
-    console.error("Signup Error:", error)
+    console.error(error)
     return { error: "Something went wrong" }
   }
 }
 
- export async function loginUser(formData: FormData) {
+export async function loginUser(formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
@@ -53,24 +52,78 @@ export async function signupUser(formData: FormData) {
   }
 
   try {
-     const user = await db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { email }
     })
 
-    if (!user) {
+    if (!user || !user.password) {
       return { error: "Invalid credentials" }
     }
 
-     const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password)
 
     if (!isMatch) {
       return { error: "Invalid credentials" }
     }
 
-    console.log("✅ Login Successful for:", email)
     return { success: true, userId: user.id }
 
   } catch (error) {
     return { error: "Something went wrong" }
+  }
+}
+
+export async function updatePassword(formData: FormData) {
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const confirm = formData.get("confirm") as string
+
+  if (!email || !password || !confirm) {
+    return { error: "Missing fields" }
+  }
+
+  if (password !== confirm) {
+    return { error: "Passwords do not match" }
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await db.user.update({
+      where: { email },
+      data: { password: hashedPassword }
+    })
+
+    return { success: true }
+  } catch (error) {
+    return { error: "Failed to update password" }
+  }
+}
+
+// 👇 THIS IS THE MISSING FUNCTION FOR EMAILS
+export async function sendPasswordResetEmail(formData: FormData) {
+  const email = formData.get("email") as string
+
+  if (!email) return { error: "Email is required" }
+
+  const user = await db.user.findUnique({ where: { email } })
+  if (!user) return { error: "User not found" }
+
+  // 🟢 DEPLOYMENT FIX:
+  // This line automatically switches between "localhost:3000" and your Vercel URL
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+  const resetLink = `${baseUrl}/reset-password?email=${email}`
+
+  try {
+    await resend.emails.send({
+      from: "onboarding@resend.dev", // Keep this for Free Mode
+      to: email,
+      subject: "Reset your IronLift Password",
+      html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`
+    })
+    return { success: true }
+  } catch (e) {
+    console.error(e)
+    return { error: "Failed to send email" }
   }
 }

@@ -42,6 +42,8 @@ model User {
   image         String?
   password      String?
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt // Added this (good practice)
+  checkInHistory DateTime[] @default([])
 
   // 1. Personal Stats
   age    Int?
@@ -59,20 +61,26 @@ model User {
   workoutPlan Json?
   dietPlan    Json?
 
-  // 4. Gamification
+  // 4. Manual Planner & Streak (NEW FIELDS ADDED HERE 👇)
+  customWorkout Json?      
+  customDiet    Json?      
+  currentStreak Int       @default(0)  
+  maxStreak     Int       @default(0)  
+  lastCheckIn   DateTime?  
+
+  // 5. Gamification (Legacy/AI)
   streak      Int       @default(0)
   lastWorkout DateTime?
 
   // Relations
   accounts Account[]
   sessions Session[]
-  mealLogs MealLog[] // <--- ADDED THIS (Fixes the "missing opposite relation" error)
+  mealLogs MealLog[]
 }
 
-// Fixed MealLog Model for MongoDB
 model MealLog {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId // <--- Fixed ID format
-  userId    String   @db.ObjectId // <--- Fixed Foreign Key type
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   name      String
   calories  Int

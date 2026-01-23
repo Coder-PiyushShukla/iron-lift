@@ -1,107 +1,102 @@
 "use client"
 
-import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { markWorkoutComplete } from "..//app//actions/user-data"
-import { Flame, PlayCircle, Trophy, BookOpen } from "lucide-react"
+import { PlayCircle, BookOpen } from "lucide-react"
 
 export default function UserDashboard({ user }: { user: any }) {
-  const [streak, setStreak] = useState(user?.streak || 0)
-
-  const handleComplete = async () => {
-    const res = await markWorkoutComplete()
-    if (res.newStreak) {
-      setStreak(res.newStreak)
-      alert("Workout Logged! Streak +1 🔥")
-    }
-  }
-
   const diet = user.dietPlan
   const workout = user.workoutPlan
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12">
+    <div className="min-h-screen p-6 md:p-12">
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Welcome back, {user.name}</h1>
-        <div className="bg-red-600/20 text-red-500 px-4 py-2 rounded-full flex items-center gap-2 border border-red-600/50">
-          <Flame /> {streak} Day Streak
-        </div>
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-black italic tracking-tighter">
+          Welcome back, <span className="text-red-500">{user.name}</span>
+        </h1>
       </div>
 
       <Tabs defaultValue="workout" className="w-full">
-        <TabsList className="bg-zinc-900 border-zinc-800">
-          <TabsTrigger value="workout">Workout Plan</TabsTrigger>
-          <TabsTrigger value="diet">Diet Plan</TabsTrigger>
-          <TabsTrigger value="learn">Learn</TabsTrigger>
+        {/* Modern Glass Tabs */}
+        <TabsList className="bg-white/5 border border-white/10 p-1 rounded-full h-14 w-full md:w-auto">
+          <TabsTrigger value="workout" className="rounded-full h-12 px-8 text-zinc-400 data-[state=active]:bg-red-600 data-[state=active]:text-white font-bold transition-all">Workout</TabsTrigger>
+          <TabsTrigger value="diet" className="rounded-full h-12 px-8 text-zinc-400 data-[state=active]:bg-red-600 data-[state=active]:text-white font-bold transition-all">Diet</TabsTrigger>
+          <TabsTrigger value="learn" className="rounded-full h-12 px-8 text-zinc-400 data-[state=active]:bg-red-600 data-[state=active]:text-white font-bold transition-all">Learn</TabsTrigger>
         </TabsList>
 
         {/* WORKOUT TAB */}
-        <TabsContent value="workout" className="space-y-6 mt-6">
+        <TabsContent value="workout" className="space-y-6 mt-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workout.map((day: any, i: number) => (
-              <Card key={i} className="bg-zinc-900 border-zinc-800 p-6">
-                <h3 className="text-xl font-bold mb-4 text-red-500">{day.day}</h3>
+              <div key={i} className="glass-card p-6 rounded-3xl hover:bg-white/5 transition-colors">
+                <h3 className="text-xl font-bold mb-6 text-red-500 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  {day.day}
+                </h3>
                 <div className="space-y-4">
                   {day.exercises.map((ex: any, j: number) => (
-                    <div key={j} className="border-b border-zinc-800 pb-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">{ex.name}</span>
+                    <div key={j} className="border-b border-white/5 pb-3 last:border-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-bold text-zinc-200">{ex.name}</span>
                         <a 
                           href={`https://www.youtube.com/results?search_query=${ex.videoQuery}`} 
                           target="_blank" 
-                          className="text-red-400 hover:text-white"
+                          rel="noreferrer"
+                          className="text-zinc-500 hover:text-red-500 transition-colors"
                         >
                           <PlayCircle size={18} />
                         </a>
                       </div>
-                      <p className="text-xs text-gray-500">{ex.sets} sets x {ex.reps}</p>
+                      <p className="text-xs text-zinc-500 font-mono bg-black/30 inline-block px-2 py-1 rounded-md">
+                        {ex.sets} sets × {ex.reps}
+                      </p>
                     </div>
                   ))}
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
-          <Button onClick={handleComplete} className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg font-bold">
-            <Trophy className="mr-2" /> Mark Today's Workout Complete
-          </Button>
         </TabsContent>
 
         {/* DIET TAB */}
-        <TabsContent value="diet" className="mt-6">
-          <Card className="bg-zinc-900 border-zinc-800 p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-white">{diet.calories} <span className="text-lg text-gray-500">kcal</span></h2>
-              <div className="flex justify-center gap-6 mt-4 text-sm text-gray-400">
-                <span>Protein: {diet.macros.protein}</span>
-                <span>Carbs: {diet.macros.carbs}</span>
-                <span>Fats: {diet.macros.fats}</span>
+        <TabsContent value="diet" className="mt-8">
+          <div className="glass-card p-8 rounded-3xl max-w-4xl">
+            <div className="text-center mb-10 pb-8 border-b border-white/10">
+              <h2 className="text-5xl font-black text-white mb-2">{diet.calories}</h2>
+              <p className="text-zinc-500 uppercase tracking-widest text-sm font-bold">Daily Target Calories</p>
+              
+              <div className="flex justify-center gap-4 mt-6">
+                <div className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-xl text-sm font-bold border border-blue-500/20">Protein: {diet.macros.protein}</div>
+                <div className="bg-yellow-500/10 text-yellow-400 px-4 py-2 rounded-xl text-sm font-bold border border-yellow-500/20">Carbs: {diet.macros.carbs}</div>
+                <div className="bg-red-500/10 text-red-400 px-4 py-2 rounded-xl text-sm font-bold border border-red-500/20">Fats: {diet.macros.fats}</div>
               </div>
             </div>
             <div className="space-y-4">
               {diet.meals.map((meal: any, i: number) => (
-                <div key={i} className="flex justify-between items-center bg-black/40 p-4 rounded-xl">
+                <div key={i} className="flex justify-between items-center bg-black/40 p-5 rounded-2xl border border-white/5 hover:border-red-500/30 transition-colors">
                   <div>
-                    <h4 className="font-bold text-red-500">{meal.name}</h4>
-                    <p className="text-gray-300">{meal.food}</p>
+                    <h4 className="font-bold text-red-500 mb-1">{meal.name}</h4>
+                    <p className="text-zinc-300 text-sm">{meal.food}</p>
                   </div>
-                  <span className="font-mono text-zinc-500">{meal.calories} kcal</span>
+                  <span className="font-mono text-white font-bold bg-zinc-800 px-3 py-1 rounded-lg text-sm">{meal.calories} kcal</span>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </TabsContent>
 
         {/* LEARN TAB */}
-        <TabsContent value="learn" className="mt-6">
-           <div className="p-10 text-center bg-zinc-900 rounded-xl border border-zinc-800">
-             <BookOpen className="w-12 h-12 mx-auto text-red-500 mb-4" />
-             <h3 className="text-2xl font-bold">Iron Knowledge Hub</h3>
-             <p className="text-gray-400">Master the terminology to master your body.</p>
-             <Button className="mt-4" onClick={() => window.location.href='/learn'}>Go to Library</Button>
+        <TabsContent value="learn" className="mt-8">
+           <div className="p-16 text-center glass-card rounded-3xl">
+             <BookOpen className="w-16 h-16 mx-auto text-red-500 mb-6" />
+             <h3 className="text-3xl font-bold mb-2">Iron Knowledge Hub</h3>
+             <p className="text-zinc-400 mb-8 max-w-md mx-auto">Master the terminology to master your body. Access our library of fitness science.</p>
+             <Button className="h-12 px-8 rounded-full bg-white text-black hover:bg-zinc-200 font-bold" onClick={() => window.location.href='/learn'}>
+               Enter Library
+             </Button>
            </div>
         </TabsContent>
 

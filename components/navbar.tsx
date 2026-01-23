@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
-import { Dumbbell, MapPin, ScanLine, Calculator, LogOut, Settings } from "lucide-react"
+import { Dumbbell, MapPin, ScanLine, LogOut, Settings, BookOpen, Calendar, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,15 +22,31 @@ export default function Navbar() {
     { name: "Dashboard", href: "/dashboard", icon: Dumbbell },
     { name: "Gym Map", href: "/gyms", icon: MapPin },
     { name: "Scanner", href: "/scanner", icon: ScanLine },
-    { name: "Setup", href: "/onboarding", icon: Settings }, // <--- ADDED THIS
+    { name: "Planner", href: "/planner", icon: Calendar },
+    { name: "Learn", href: "/learn", icon: BookOpen },
+    { name: "Settings", href: "/bmr", icon: Settings },
   ]
+
+  const handleProtectedNav = (e: React.MouseEvent, href: string) => {
+    const protectedRoutes = ["/dashboard", "/bmr", "/scanner", "/planner"]
+    const isProtected = protectedRoutes.includes(href)
+
+    if (isProtected && !session) {
+      e.preventDefault()
+      
+      const shouldLogin = confirm("🔒 Login Required\n\nYou need to be signed in to access this feature.\nWould you like to sign in now?")
+      
+      if (shouldLogin) {
+        signIn()
+      }
+    }
+  }
 
   return (
     <nav className="border-b border-zinc-800 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tighter">
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Dumbbell size={18} />
@@ -38,12 +54,15 @@ export default function Navbar() {
             <span>IRON<span className="text-red-600">LIFT</span></span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
-                <Link key={item.href} href={item.href}>
+                <Link 
+                  key={item.href} 
+                  href={item.href}
+                  onClick={(e) => handleProtectedNav(e, item.href)}
+                >
                   <Button
                     variant="ghost"
                     className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${
@@ -58,7 +77,6 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* User Section */}
           <div className="flex items-center gap-4">
             {session ? (
               <DropdownMenu>
@@ -81,13 +99,21 @@ export default function Navbar() {
                   </div>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   
-                  {/* Quick Access to Setup in Dropdown too */}
-                  <Link href="/onboarding">
+                  <Link href="/bmr">
                     <DropdownMenuItem className="focus:bg-zinc-900 cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
-                      Update Goals
+                      Settings & Goals
                     </DropdownMenuItem>
                   </Link>
+
+                  <Link href="/about">
+                    <DropdownMenuItem className="focus:bg-zinc-900 cursor-pointer">
+                      <Info className="mr-2 h-4 w-4" />
+                      About IronLift
+                    </DropdownMenuItem>
+                  </Link>
+
+                  <DropdownMenuSeparator className="bg-zinc-800" />
 
                   <DropdownMenuItem className="focus:bg-zinc-900 cursor-pointer text-red-500 font-bold" onClick={() => signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />
