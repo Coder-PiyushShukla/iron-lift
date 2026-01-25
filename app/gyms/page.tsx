@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-// Dynamically import Map (No SSR)
 const GymMap = dynamic(() => import("@/components/gym-map"), { 
   ssr: false, 
   loading: () => <div className="h-full w-full bg-zinc-950 flex items-center justify-center text-zinc-500">Loading Maps...</div> 
@@ -17,12 +16,11 @@ const GymMap = dynamic(() => import("@/components/gym-map"), {
 
 export default function GymsPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [center, setCenter] = useState<[number, number]>([19.2183, 72.9781]) // Default: Thane
+  const [center, setCenter] = useState<[number, number]>([19.2183, 72.9781])
   const [gyms, setGyms] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedGym, setSelectedGym] = useState<any>(null)
 
-  // 1. Find City Coordinates
   const handleSearch = async () => {
     if (!searchQuery) return
     setLoading(true)
@@ -45,7 +43,6 @@ export default function GymsPage() {
     setLoading(false)
   }
 
-  // 2. FETCH REAL GYMS ONLY
   const fetchRealGyms = async (lat: number, lng: number) => {
     try {
       const query = `
@@ -82,7 +79,6 @@ export default function GymsPage() {
         }
       }).filter((g: any) => g !== null && g.lat && g.lng) 
 
-      // Remove duplicates
       const uniqueGyms = realGyms.filter((gym: any, index: number, self: any[]) =>
         index === self.findIndex((t) => (
           t.name === gym.name
@@ -102,13 +98,11 @@ export default function GymsPage() {
     fetchRealGyms(center[0], center[1])
   }, [])
 
-  // Helper: Open Google Maps Search for the current area
   const openGoogleMapsSearch = () => {
     const query = encodeURIComponent(`gyms in ${searchQuery || "my area"}`)
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank')
   }
 
-  // Helper: Handle clicking "Website" or "Search" for a specific gym
   const openGymSite = (gym: any) => {
     if (gym.website) {
       window.open(gym.website, '_blank')
@@ -121,10 +115,8 @@ export default function GymsPage() {
   return (
     <div className="h-screen w-full flex flex-col md:flex-row bg-zinc-950 text-white overflow-hidden relative">
       
-      {/* ---------------- LEFT SIDEBAR ---------------- */}
       <div className="w-full md:w-100 h-full flex flex-col border-r border-zinc-800 bg-zinc-900/50 backdrop-blur-xl z-20 shadow-2xl">
         
-        {/* Header */}
         <div className="p-6 border-b border-zinc-800 space-y-4">
           <h1 className="text-2xl font-black flex items-center gap-2 tracking-tighter">
             <MapPin className="text-red-600 fill-red-600/20" /> 
@@ -146,10 +138,8 @@ export default function GymsPage() {
           </div>
         </div>
 
-        {/* List of Gyms */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
           
-          {/* EMPTY STATE */}
           {gyms.length === 0 && !loading && (
              <div className="flex flex-col items-center justify-center h-40 text-center p-4">
                <AlertCircle className="h-10 w-10 text-zinc-600 mb-4" />
@@ -197,7 +187,6 @@ export default function GymsPage() {
           ))}
         </div>
 
-        {/* 🆕 NEW FOOTER: Always Visible Google Maps Search */}
         <div className="p-4 border-t border-zinc-800 bg-black/60 backdrop-blur-md">
           <Button 
             variant="secondary" 
@@ -211,11 +200,9 @@ export default function GymsPage() {
 
       </div>
 
-      {/* ---------------- RIGHT SIDE (Map) ---------------- */}
       <div className="flex-1 relative h-[50vh] md:h-full">
         <GymMap center={center} gyms={gyms} onGymClick={setSelectedGym} />
         
-        {/* Detail Card Overlay */}
         <AnimatePresence>
           {selectedGym && (
             <motion.div 

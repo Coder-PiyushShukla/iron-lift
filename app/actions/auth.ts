@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { Resend } from "resend"
 
-// Initialize Resend with your API Key
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function signupUser(formData: FormData) {
@@ -100,7 +100,7 @@ export async function updatePassword(formData: FormData) {
   }
 }
 
-// 👇 THIS IS THE MISSING FUNCTION FOR EMAILS
+
 export async function sendPasswordResetEmail(formData: FormData) {
   const email = formData.get("email") as string
 
@@ -109,8 +109,7 @@ export async function sendPasswordResetEmail(formData: FormData) {
   const user = await db.user.findUnique({ where: { email } })
   if (!user) return { error: "User not found" }
 
-  // 🟢 DEPLOYMENT FIX:
-  // This line automatically switches between "localhost:3000" and your Vercel URL
+   
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
   const resetLink = `${baseUrl}/reset-password?email=${email}`
 
