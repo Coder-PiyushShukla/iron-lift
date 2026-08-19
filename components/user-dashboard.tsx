@@ -4,14 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PlayCircle, BookOpen } from "lucide-react"
+import ExerciseRow from "./exercise-row"
 
-export default function UserDashboard({ user }: { user: any }) {
+export default function UserDashboard({ user, exerciseLogs = [] }: { user: any; exerciseLogs?: any[] }) {
   const diet = user.dietPlan
   const workout = user.workoutPlan
 
   return (
     <div className="min-h-screen p-6 md:p-12">
-      
+
       {/* Header */}
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-black italic tracking-tighter">
@@ -36,24 +37,9 @@ export default function UserDashboard({ user }: { user: any }) {
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                   {day.day}
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {day.exercises.map((ex: any, j: number) => (
-                    <div key={j} className="border-b border-white/5 pb-3 last:border-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-bold text-zinc-200">{ex.name}</span>
-                        <a 
-                          href={`https://www.youtube.com/results?search_query=${ex.videoQuery}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="text-zinc-500 hover:text-red-500 transition-colors"
-                        >
-                          <PlayCircle size={18} />
-                        </a>
-                      </div>
-                      <p className="text-xs text-zinc-500 font-mono bg-black/30 inline-block px-2 py-1 rounded-md">
-                        {ex.sets} sets × {ex.reps}
-                      </p>
-                    </div>
+                    <ExerciseRow key={j} ex={ex} exerciseLogs={exerciseLogs} />
                   ))}
                 </div>
               </div>
@@ -67,7 +53,7 @@ export default function UserDashboard({ user }: { user: any }) {
             <div className="text-center mb-10 pb-8 border-b border-white/10">
               <h2 className="text-5xl font-black text-white mb-2">{diet.calories}</h2>
               <p className="text-zinc-500 uppercase tracking-widest text-sm font-bold">Daily Target Calories</p>
-              
+
               <div className="flex justify-center gap-4 mt-6">
                 <div className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-xl text-sm font-bold border border-blue-500/20">Protein: {diet.macros.protein}</div>
                 <div className="bg-yellow-500/10 text-yellow-400 px-4 py-2 rounded-xl text-sm font-bold border border-yellow-500/20">Carbs: {diet.macros.carbs}</div>
@@ -90,14 +76,14 @@ export default function UserDashboard({ user }: { user: any }) {
 
         {/* LEARN TAB */}
         <TabsContent value="learn" className="mt-8">
-           <div className="p-16 text-center glass-card rounded-3xl">
-             <BookOpen className="w-16 h-16 mx-auto text-red-500 mb-6" />
-             <h3 className="text-3xl font-bold mb-2">Iron Knowledge Hub</h3>
-             <p className="text-zinc-400 mb-8 max-w-md mx-auto">Master the terminology to master your body. Access our library of fitness science.</p>
-             <Button className="h-12 px-8 rounded-full bg-white text-black hover:bg-zinc-200 font-bold" onClick={() => window.location.href='/learn'}>
-               Enter Library
-             </Button>
-           </div>
+          <div className="p-16 text-center glass-card rounded-3xl">
+            <BookOpen className="w-16 h-16 mx-auto text-red-500 mb-6" />
+            <h3 className="text-3xl font-bold mb-2">Iron Knowledge Hub</h3>
+            <p className="text-zinc-400 mb-8 max-w-md mx-auto">Master the terminology to master your body. Access our library of fitness science.</p>
+            <Button className="h-12 px-8 rounded-full bg-white text-black hover:bg-zinc-200 font-bold" onClick={() => window.location.href = '/learn'}>
+              Enter Library
+            </Button>
+          </div>
         </TabsContent>
 
       </Tabs>

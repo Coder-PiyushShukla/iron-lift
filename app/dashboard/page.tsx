@@ -15,10 +15,19 @@ export default async function DashboardPage() {
     where: { email: session.user.email }
   })
 
+  if (!user) {
+    redirect("/")
+  }
+
   // If user has no plan, send them to generate one
   if (!user?.workoutPlan) {
     redirect("/generate")
   }
 
-  return <UserDashboard user={user} />
+  const exerciseLogs = await db.exerciseLog.findMany({
+    where: { userId: user.id },
+    orderBy: { date: 'desc' }
+  })
+
+  return <UserDashboard user={user} exerciseLogs={exerciseLogs} />
 }

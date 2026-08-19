@@ -73,9 +73,10 @@ model User {
   lastWorkout DateTime?
 
   // Relations
-  accounts Account[]
-  sessions Session[]
-  mealLogs MealLog[]
+  accounts    Account[]
+  sessions    Session[]
+  mealLogs    MealLog[]
+  exerciseLogs ExerciseLog[]
 }
 
 model MealLog {
@@ -89,4 +90,14 @@ model MealLog {
   fats      Int
   imageUrl  String?
   createdAt DateTime @default(now())
+}
+
+model ExerciseLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseName String
+  weight       Float
+  reps         Int
+  date         DateTime @default(now())
 }
