@@ -29,5 +29,10 @@ export default async function ProgressPage() {
         orderBy: { date: 'desc' },
     })
 
-    return <ProgressClient user={user} exerciseLogs={exerciseLogs} />
+    return (
+        <ProgressClient
+            user={user}
+            exerciseLogs={exerciseLogs}
+        />
+    )
 }
